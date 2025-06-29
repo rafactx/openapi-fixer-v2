@@ -24,12 +24,6 @@ metadata:
         customerSubdomain:
           default: 'sua-empresa'
           description: 'Subdomínio específico do seu ambiente/cliente (ex: demo, cliente1).'
-    - url: 'https://staging.{customerSubdomain}.involves.com/webservices/api'
-      description: 'Servidor de Homologação (Staging)'
-      variables:
-        customerSubdomain:
-          default: 'sua-empresa'
-          description: 'Subdomínio do seu ambiente de homologação.'
 
 # 2. Esquemas de Segurança
 security_schemes:

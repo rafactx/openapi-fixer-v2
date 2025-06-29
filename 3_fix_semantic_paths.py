@@ -6,10 +6,7 @@ Este script aplica correções específicas para resolver problemas semânticos
 em definições de paths que violam a especificação OpenAPI.
 
 Uso:
-    python fix_semantic_paths.py <caminho_para_openapi.json>
-
-Exemplo:
-    python fix_semantic_paths.py ./openapi.json
+    python3 3_fix_semantic_paths.py openapi.json
 
 Correções aplicadas:
     1. Remove requestBody inválido de operação DELETE
@@ -64,6 +61,10 @@ class SemanticPathsFixer:
         if not json_path.startswith("paths."):
             return None
 
+        # Verificar se o documento foi carregado
+        if self.openapi_doc is None:
+            return None
+
         path_part = json_path[6:]  # Remove "paths."
 
         # Separar path template do método HTTP
@@ -95,6 +96,10 @@ class SemanticPathsFixer:
             Dicionário do path object ou None se não encontrado
         """
         if not json_path.startswith("paths."):
+            return None
+
+        # Verificar se o documento foi carregado
+        if self.openapi_doc is None:
             return None
 
         path_part = json_path[6:]  # Remove "paths."
@@ -252,6 +257,11 @@ class SemanticPathsFixer:
     def validate_paths_semantics(self) -> None:
         """Executa validações básicas na estrutura de paths."""
         print("\n🔍 Validando semântica dos paths...")
+
+        # Verificar se o documento foi carregado
+        if self.openapi_doc is None:
+            print("⚠️  Documento OpenAPI não foi carregado")
+            return
 
         if "paths" not in self.openapi_doc:
             print("⚠️  Nenhum objeto 'paths' encontrado")
