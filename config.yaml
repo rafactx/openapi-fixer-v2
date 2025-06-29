@@ -1,0 +1,239 @@
+# config.v2.yaml
+# Fonte de verdade para todos os scripts de pós-processamento do openapi.json
+
+# 1. Metadados Principais da API
+metadata:
+  info:
+    title: 'Involves Stage API'
+    version: '3.0.3'
+    description: |
+      API completa para gerenciamento de pontos de venda, produtos, colaboradores e pesquisas no Involves Stage.
+      Use esta documentação como referência para integrar seus sistemas.
+    termsOfService: 'https://involves.com/termos-de-uso'
+    contact:
+      name: 'Suporte Involves'
+      email: 'suporte@involves.com'
+      url: 'https://help.involves.com'
+    license:
+      name: 'Proprietary'
+      url: 'https://involves.com/licenca-de-uso'
+  servers:
+    - url: 'https://{customerSubdomain}.involves.com/webservices/api'
+      description: 'Servidor de Produção'
+      variables:
+        customerSubdomain:
+          default: 'sua-empresa'
+          description: 'Subdomínio específico do seu ambiente/cliente (ex: demo, cliente1).'
+    - url: 'https://staging.{customerSubdomain}.involves.com/webservices/api'
+      description: 'Servidor de Homologação (Staging)'
+      variables:
+        customerSubdomain:
+          default: 'sua-empresa'
+          description: 'Subdomínio do seu ambiente de homologação.'
+
+# 2. Esquemas de Segurança
+security_schemes:
+  BasicAuth:
+    type: http
+    scheme: basic
+    description: |
+      **Autenticação na API**
+      A API do Involves Stage utiliza o esquema de autenticação **HTTP Basic Authentication**. Para realizar requisições autenticadas, siga os passos abaixo:
+      1. Combine seu usuário e senha no formato `usuario:senha`.
+      2. Codifique as credenciais em Base64.
+      3. Inclua o resultado no header da requisição: `Authorization: Basic <suas-credenciais-em-base64>`
+
+# 3. Schemas Comuns e Reutilizáveis (APRIMORADO)
+# Define os schemas que serão injetados em #/components/schemas/
+common_schemas:
+  ErrorResponseV3:
+    type: object
+    description: "Resposta padrão para erros em endpoints v3 e mais recentes."
+    properties:
+      status: { type: "integer", description: "Código de status HTTP." }
+      term: { type: "string", description: "Código do erro para auxiliar o suporte." }
+      message: { type: "string", description: "Mensagem geral descrevendo o erro." }
+      details: { type: "array", items: { type: "object", properties: {"field": {"type": "string"}, "message": {"type": "string"}}} }
+  ErrorResponseLegacy:
+    type: object
+    description: "Resposta padrão para erros em endpoints legados (v1, v2)."
+    properties:
+      code: { type: "integer", description: "Código numérico do erro." }
+      subCode: { type: "integer", description: "Código numérico secundário." }
+      message: { type: "string", description: "Mensagem geral descrevendo o erro." }
+      keyMessage: { type: "string", description: "Chave de erro para auxiliar o suporte." }
+
+# 4. Respostas de Erro Padrão (APRIMORADO)
+# Estruturado para que o script saiba qual conjunto de respostas aplicar a cada endpoint.
+default_error_responses:
+  # Aplicado a paths que começam com /v3 ou /environments
+  v3:
+    '400':
+      description: 'Requisição inválida (Bad Request).'
+      content:
+        application/json: { schema: { $ref: '#/components/schemas/ErrorResponseV3' } }
+    '401':
+      description: 'Autenticação falhou (Unauthorized).'
+      content:
+        application/json: { schema: { $ref: '#/components/schemas/ErrorResponseV3' } }
+    '404':
+      description: 'Recurso não encontrado (Not Found).'
+      content:
+        application/json: { schema: { $ref: '#/components/schemas/ErrorResponseV3' } }
+  # Aplicado a todos os outros paths (legados)
+  legacy:
+    '400':
+      description: 'Requisição inválida (Bad Request).'
+      content:
+        application/json: { schema: { $ref: '#/components/schemas/ErrorResponseLegacy' } }
+    '401':
+      description: 'Autenticação falhou (Unauthorized).'
+      content:
+        application/json: { schema: { $ref: '#/components/schemas/ErrorResponseLegacy' } }
+    '404':
+      description: 'Recurso não encontrado (Not Found).'
+      content:
+        application/json: { schema: { $ref: '#/components/schemas/ErrorResponseLegacy' } }
+
+# 5. Mapeamento de Placeholders para Texto (Renomeado para clareza)
+text_replacement_map:
+  "api.doc.v3.section.pointofsale.title": { "name": "Ponto de Venda", "description": "Operações para criar, consultar, e gerenciar pontos de venda (PDVs)." }
+  "api.doc.v3.section.product.title": { "name": "Produto", "description": "Gerenciamento do catálogo de produtos, SKUs, marcas e categorias." }
+  "api.doc.v3.section.employee.title": { "name": "Colaborador", "description": "Gerenciamento de usuários, perfis de acesso, e equipes de campo." }
+  "api.doc.v3.section.surveys.title": { "name": "Pesquisas", "description": "Endpoints para interagir com formulários e coletas de dados." }
+  "api.doc.v3.section.itinerary-visits.title": { "name": "Roteiro e Visitas", "description": "Operações para agendamento, consulta e execução de visitas." }
+  "api.doc.v1.section.sync.title": { "name": "Sincronizações", "description": "Endpoints legados para sincronização de dados." }
+
+# 6. Parâmetros Globais
+global_parameters:
+  X-AGILE-CLIENT:
+    name: 'X-AGILE-CLIENT'
+    in: 'header'
+    required: true
+    description: 'Identifica a origem da requisição. **Valor fixo: "EXTERNAL_APP"**.'
+    schema: { type: 'string', default: 'EXTERNAL_APP' }
+  Accept-Version:
+    name: 'Accept-Version'
+    in: 'header'
+    description: 'Informa a versão da API v3 (formato `YYYY-MM-DD`). Não é necessário para v1/v2.'
+    schema: { type: 'string', example: '2020-02-26' }
+
+# 7. Regras de Ordenação da UI
+ui_ordering:
+  # Ordem das tags na barra lateral (padrão OpenAPI)
+  tag_order:
+    - "Colaborador"
+    - "Pesquisas"
+    - "Ponto de Venda"
+    - "Produto"
+    - "Roteiro e Visitas"
+    - "Sincronizações"
+  # Ordem das operações DENTRO de cada tag (extensão customizada, marcada com x-)
+  # O script que implementa isso precisa de lógica customizada para reordenar os paths.
+  x-operation-order:
+    "Colaborador":
+      - "Afastamento por ID"
+      - "Afastamentos de Colaborador"
+      - "Colaborador por ID (v1)"
+      - "Colaborador por ID (v3)"
+      - "Colaboradores (v1)"
+      - "Editar Colaborador"
+      - "Endereço do Colaborador"
+      - "Excluir Colaborador"
+      - "Excluir Várias Visitas"
+      - "Inativar Colaborador"
+      - "Novo Colaborador (v1)"
+      - "Perfil de Acesso por ID"
+      - "Salvar Várias Visitas"
+      - "Visitas Agendadas"
+    "Pesquisas":
+      - "Campos do Formulário"
+      - "Dados do Formulário"
+      - "Formulários Ativos"
+      - "Imagem de Formulário"
+    "Ponto de Venda":
+      - "Atualizar PDV (parcial)"
+      - "Banner por ID (v3)"
+      - "Banner por Nome (v3)"
+      - "Banner por Nome (v3 Query)"
+      - "Canais de PDV"
+      - "Canal de PDV por ID"
+      - "Canal de PDV por Nome"
+      - "Canal de PDV por Nome (Query)"
+      - "Cidades"
+      - "Cidade por ID"
+      - "Editar PDV (v1)"
+      - "Editar Regional"
+      - "Endereço do PDV"
+      - "Estado por Código do País"
+      - "Estado por ID"
+      - "Excluir PDV (v1)"
+      - "Macro-Regional por ID"
+      - "Nova Rede (v3)"
+      - "Nova Regional"
+      - "Novo Canal de PDV"
+      - "Novo PDV (v1)"
+      - "Novo Perfil de PDV (v3)"
+      - "Novo Tipo de PDV (v3)"
+      - "País por Código"
+      - "Países"
+      - "PDV por ID (v1)"
+      - "PDV por ID (v3)"
+      - "Perfil de PDV por ID"
+      - "Perfil de PDV por Nome"
+      - "Perfis de PDV"
+      - "Pontos de Venda (v1)"
+      - "Pontos de Venda (v3)"
+      - "Rede por ID (v3)"
+      - "Rede por Nome (v3)"
+      - "Redes/Bandeiras (v1)"
+      - "Regionais (v3)"
+      - "Regional"
+      - "Regional por ID (v3)"
+      - "Shopping Center por ID"
+      - "Shoppings Centers"
+      - "Tipo de PDV por ID"
+      - "Tipo de PDV por Nome"
+      - "Tipos de PDV"
+    "Produto":
+      - "Atualizar Linha de Produto"
+      - "Atualizar SKU"
+      - "Categoria de Produto por ID"
+      - "Categoria por ID (v3)"
+      - "Linha de Produto por ID (v1)"
+      - "Linha de Produto por ID (v3)"
+      - "Linhas de Produto"
+      - "Linhas de Produto (v3)"
+      - "Marca por ID"
+      - "Marcas"
+      - "Nova Linha de Produto"
+      - "Novo SKU"
+      - "SKU (v1)"
+      - "SKU por ID (v1)"
+      - "SKU por ID (v3)"
+      - "SKUs (v3)"
+      - "Supercategoria de Produto por ID (v1)"
+      - "Supercategoria por ID (v3)"
+      - "Supercategorias (v3)"
+    "Roteiro e Visitas":
+      - "Excluir Várias Visitas"
+      - "Justificativa de Não Comparecimento"
+      - "Roteiro por Data (v2)"
+      - "Salvar Várias Visitas"
+      - "Visitas Agendadas"
+      - "Visitas por Colaborador"
+
+# 8. Heurísticas para Geração de Exemplos
+example_generation_heuristics:
+  string_keywords:
+    # Formato: "palavra-chave|sinonimo": "valor do exemplo"
+    name|nome: "João da Silva"
+    email: "contato@exemplo.com.br"
+    phone|telefone: "+55 48 98765-4321"
+    address|endereco: "Rua das Flores, 123, Bairro Centro"
+    city|cidade: "Florianópolis"
+    state|estado: "Santa Catarina"
+    country|pais: "Brasil"
+    code|codigo: "COD-ALFA-456"
+    id: "identificador-unico-123"
+    description|descricao: "Descrição detalhada de exemplo para o item em questão."

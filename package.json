@@ -1,0 +1,68 @@
+{
+  "name": "openapi-fixer-toolkit",
+  "version": "1.0.0",
+  "description": "Kit de ferramentas Python para processar, corrigir e aprimorar documentações OpenAPI automaticamente",
+  "main": "index.js",
+  "scripts": {
+    "setup": "python -m venv .venv && .venv/bin/activate && pip install PyYAML",
+    "hydrate": "python 1_hydrate_openapi.py",
+    "fix-schemas": "python 2_fix_schema_names_and_refs.py",
+    "fix-semantic": "python 3_fix_semantic_paths.py",
+    "fix-all": "python 2_fix_schema_names_and_refs.py openapi.json --verbose && python 3_fix_semantic_paths.py openapi.json --verbose",
+    "export-config": "python 3_fix_semantic_paths.py --export-config corrections-template.yaml",
+    "lint": "python -m py_compile *.py",
+    "clean": "find . -name '*.pyc' -delete && find . -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null || true",
+    "help": "echo 'Scripts disponíveis:\\n  setup - Configura ambiente virtual\\n  hydrate - Hidrata OpenAPI\\n  fix-schemas - Corrige schemas\\n  fix-semantic - Corrige semântica\\n  fix-all - Executa correções completas'"
+  },
+  "keywords": [
+    "openapi",
+    "swagger",
+    "api-documentation",
+    "schema-validation",
+    "python-tools",
+    "api-fixer",
+    "automation",
+    "documentation-tools",
+    "rest-api",
+    "yaml",
+    "json",
+    "openapi3"
+  ],
+  "author": {
+    "name": "Rafael Teixeira",
+    "email": "teixeirac.rafael@gmail.com"
+  },
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "python": ">=3.7",
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rafactx/openapi-fixer-v2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rafactx/openapi-fixer-v2/issues"
+  },
+  "homepage": "https://github.com/rafactx/openapi-fixer-v2#readme",
+  "devDependencies": {},
+  "dependencies": {},
+  "python": {
+    "dependencies": [
+      "PyYAML>=6.0"
+    ],
+    "dev_dependencies": [
+      "black",
+      "flake8",
+      "mypy"
+    ]
+  },
+  "files": [
+    "1_hydrate_openapi.py",
+    "2_fix_schema_names_and_refs.py",
+    "3_fix_semantic_paths.py",
+    "README.md",
+    "examples/"
+  ]
+}
